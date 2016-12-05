@@ -10,5 +10,5 @@ Next line: integer representing # atomic propositions - 1-indexed
 Next lines: integer representing state, then integers representing props fulfilled in that state  
 EOF
 
-An example can be found in kripke.txt  
+An example can be found in kripke.txt, which represents the structure in kripke-simple.png  
 Parser currently does not support named states or propositions
