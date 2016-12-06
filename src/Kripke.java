@@ -34,11 +34,6 @@ public class Kripke {
 		labeler = l;
 	}
 	
-	/* Functions to write:
-	 * Given state find all states that can reach it
-	 * find Strongly Connected Components of the graph
-	 */
-	
 	//does the Kripke structure model the given proposition
 	//this holds if the proposition is satisfied by all initial states of K
 	public boolean models(CTLProp p) {
@@ -128,6 +123,34 @@ public class Kripke {
 			if(res) p.addSatisfyingState(s);
 			return res;
 		}
+		case EG: {//K, s0 models EG p iff there exists an si, sj, ... such that s0 -> ... -> si -> sj -> ... and si, sj, ... model p
+			//using scc(p) as "fin" as above, use DFS to find if there's a path from s to a state in fin
+			List<Number> fin = scc(p);
+			ArrayList<Number> discovered = new ArrayList<Number>();
+			
+			//simple DFS
+			Stack<Number> stack = new Stack<Number>();
+			stack.push(s);
+			while(!stack.isEmpty()) {
+				Number curr = stack.pop();
+				if(!discovered.contains(curr)) {
+					discovered.add(curr);
+					List<Number> nexts = transitions.get(curr);
+					for(Number a : nexts) {
+						if(fin.contains(a)) {
+							res = true;
+							break;
+						}
+						else {
+							stack.push(a);
+						}
+					}
+					if(res) break;
+				}
+			}
+			if(res) p.addSatisfyingState(s);
+			return res;
+		}
 		default: return false;
 		}
 	}
@@ -137,6 +160,17 @@ public class Kripke {
 		for(int a = 1; a <= states; a++) {
 			if(models(p, a)) res.add(a);
 		}
+		return res;
+	}
+	
+	//returns a list containing every state that is in a SCC, such that all states in that SCC satisfy p
+	public List<Number> scc(CTLProp p) {
+		List<Number> acceptable = modelling_states(p);
+		ArrayList<Number> res = new ArrayList<Number>();
+		//find all SCCs with Tarjan's algorithm
+		//for each SCC check if acceptable entirely contains it
+		//if so, add it to res
+		//return res
 		return res;
 	}
 }
