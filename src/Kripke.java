@@ -1,11 +1,10 @@
 import java.util.Map;
-
-import javax.print.attribute.standard.Finishings;
-
+import java.util.HashMap;
 import java.util.List;
 import java.util.ArrayList;
 import ctltree.*;
 import java.util.Stack;
+import java.lang.Math;
 
 public class Kripke {
 	
@@ -51,6 +50,7 @@ public class Kripke {
 		
 		switch(p.getType()) {
 		case TERMINAL: {
+			if(labeler.get(s) == null) return false;
 			res = labeler.get(s).contains(p.getProp());
 			if(res) p.addSatisfyingState(s);
 			return res;
@@ -72,6 +72,7 @@ public class Kripke {
 		}
 		case EX: { //K, s0 models EX p iff there exists an s1 such that s0 -> s1 and K, s1 models p
 			List<Number> nexts = transitions.get(s);
+			if(nexts == null) return false;
 			for(Number n : nexts) {
 				res = res || (models(p.getChildren().get(0), n));
 			}
@@ -107,6 +108,9 @@ public class Kripke {
 					if(!discovered.contains(curr)) {
 						discovered.add(curr);
 						List<Number> nexts = transitions.get(curr);
+						
+						if(nexts == null) break;
+						
 						for(Number a : nexts) {
 							if(fin.contains(a)) {
 								res = true;
@@ -125,7 +129,7 @@ public class Kripke {
 		}
 		case EG: {//K, s0 models EG p iff there exists an si, sj, ... such that s0 -> ... -> si -> sj -> ... and si, sj, ... model p
 			//using scc(p) as "fin" as above, use DFS to find if there's a path from s to a state in fin
-			List<Number> fin = scc(p);
+			List<Number> fin = sccProp(p.getChildren().get(0));
 			ArrayList<Number> discovered = new ArrayList<Number>();
 			
 			//simple DFS
@@ -136,6 +140,9 @@ public class Kripke {
 				if(!discovered.contains(curr)) {
 					discovered.add(curr);
 					List<Number> nexts = transitions.get(curr);
+					
+					if(nexts == null) break;
+					
 					for(Number a : nexts) {
 						if(fin.contains(a)) {
 							res = true;
@@ -164,13 +171,75 @@ public class Kripke {
 	}
 	
 	//returns a list containing every state that is in a SCC, such that all states in that SCC satisfy p
-	public List<Number> scc(CTLProp p) {
+	private List<Number> sccProp(CTLProp p) {
 		List<Number> acceptable = modelling_states(p);
 		ArrayList<Number> res = new ArrayList<Number>();
 		//find all SCCs with Tarjan's algorithm
+		ArrayList<ArrayList<Number>> allSCCs = scc();
 		//for each SCC check if acceptable entirely contains it
-		//if so, add it to res
+		for(List<Number> scc : allSCCs) {
+			//if so, add it to res
+			if(acceptable.containsAll(scc)) {
+				//(but don't add duplicate numbers)
+				for(Number n : scc) {
+					if(!res.contains(n)) res.add(n);
+				}
+			}
+		}
 		//return res
 		return res;
+	}
+
+	private HashMap<Number, Number> indexes = null;
+	private int index = 0;
+	private HashMap<Number, Number> lowlinks = null;
+	private Stack<Number> stack = null;
+	private ArrayList<ArrayList<Number>> sccs = null;
+	
+	//returns a list of SCCs in the Kripke structure (SCCs are lists of states)
+	//based on https://en.wikipedia.org/wiki/Tarjan's_strongly_connected_components_algorithm
+	private ArrayList<ArrayList<Number>> scc() {
+		indexes = new HashMap<Number, Number>();
+		index = 0;
+		lowlinks = new HashMap<Number, Number>();
+		stack = new Stack<Number>();
+		sccs = new ArrayList<ArrayList<Number>>();
+		
+		for(int a = 1; a <= states; a++) {
+			if(indexes.get(a) == null) {
+				sccinternal(a);
+			}
+		}
+		
+		return sccs;
+	}
+	
+	private void sccinternal(int v) {
+		indexes.put(v, index);
+		lowlinks.put(v, index);
+		index++;
+		stack.push(v);
+		
+		if(transitions.get(v) == null) return;
+		
+		for(Number w : transitions.get(v)) {
+			if(indexes.get(w) == null) {
+				sccinternal((int)w);
+				lowlinks.put(v, Math.min((int)lowlinks.get(v), (int)lowlinks.get(w)));
+			}
+			else if(stack.contains(w)) {
+				lowlinks.put(v, Math.min((int)lowlinks.get(v), (int)indexes.get(w)));
+			}
+		}
+		
+		if(lowlinks.get(v) == indexes.get(v)) {
+			ArrayList<Number> newSCC = new ArrayList<Number>();
+			int w;
+			do {
+				w = (int)stack.pop();
+				newSCC.add(w);
+			} while(w != v);
+			sccs.add(newSCC);
+		}
 	}
 }
