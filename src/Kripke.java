@@ -52,22 +52,18 @@ public class Kripke {
 		case TERMINAL: {
 			if(labeler.get(s) == null) return false;
 			res = labeler.get(s).contains(p.getProp());
-			if(res) p.addSatisfyingState(s);
 			return res;
 		}
 		case OR: {
 			res = (models(p.getChildren().get(0), s) || models(p.getChildren().get(1), s));
-			if(res) p.addSatisfyingState(s);
 			return res;
 		}
 		case AND: {
 			res = (models(p.getChildren().get(0), s) && models(p.getChildren().get(1), s));
-			if(res) p.addSatisfyingState(s);
 			return res;
 		}
 		case NOT: {
 			res = !(models(p.getChildren().get(0), s));
-			if(res) p.addSatisfyingState(s);
 			return res;
 		}
 		case EX: { //K, s0 models EX p iff there exists an s1 such that s0 -> s1 and K, s1 models p
@@ -76,7 +72,6 @@ public class Kripke {
 			for(Number n : nexts) {
 				res = res || (models(p.getChildren().get(0), n));
 			}
-			if(res) p.addSatisfyingState(s);
 			return res;
 		}
 		case EU: {//K, s0 models EpUv iff there exists an s' such that s0 -> ... -> s', K, s' models v, and s0 -> ... all model p
@@ -124,7 +119,6 @@ public class Kripke {
 					}
 				}
 			}
-			if(res) p.addSatisfyingState(s);
 			return res;
 		}
 		case EG: {//K, s0 models EG p iff there exists an si, sj, ... such that s0 -> ... -> si -> sj -> ... and si, sj, ... model p
@@ -155,7 +149,6 @@ public class Kripke {
 					if(res) break;
 				}
 			}
-			if(res) p.addSatisfyingState(s);
 			return res;
 		}
 		default: return false;

@@ -107,7 +107,14 @@ public class CTL_Checker {
 			System.out.println("Unforeseen exception, maybe the Kripke structure is incorrectly defined?");
 		}
 		
-		CTLProp c = new CTLProp(new CTLProp(1), CTLEnum.EG);
-		System.out.println(krip.models(c));
+		System.out.println("Thanks, now please provide path to file specifying CTL formulae to check");
+		
+		path = in.nextLine();
+		
+		List<CTLProp> formulae = new CTLParser().parse(path);
+		
+		for(CTLProp f : formulae) {
+			System.out.println(krip.models(f));
+		}
 	}
 }

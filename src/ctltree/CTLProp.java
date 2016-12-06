@@ -46,18 +46,6 @@ public class CTLProp{
 		return terminal;
 	}
 	
-	public void addSatisfyingStates(List<Number> s) {
-		satisfyingStates.addAll(s);
-	}
-	
-	public void addSatisfyingState(Number n) {
-		satisfyingStates.add(n);
-	}
-	
-	public List<Number> getSatisfyingStates() {
-		return satisfyingStates;
-	}
-	
 	public CTLEnum getType() {
 		return type;
 	}
