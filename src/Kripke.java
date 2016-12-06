@@ -1,7 +1,11 @@
 import java.util.Map;
+
+import javax.print.attribute.standard.Finishings;
+
 import java.util.List;
 import java.util.ArrayList;
 import ctltree.*;
+import java.util.Stack;
 
 public class Kripke {
 	
@@ -75,6 +79,51 @@ public class Kripke {
 			List<Number> nexts = transitions.get(s);
 			for(Number n : nexts) {
 				res = res || (models(p.getChildren().get(0), n));
+			}
+			if(res) p.addSatisfyingState(s);
+			return res;
+		}
+		case EU: {//K, s0 models EpUv iff there exists an s' such that s0 -> ... -> s', K, s' models v, and s0 -> ... all model p
+			//if s models v EpUv is trivially true
+			if(models(p.getChildren().get(1), s)) res = true;
+			//but if s doesn't model v or p EpUv is trivially false
+			else if(!models(p.getChildren().get(0), s)) res = false;
+			else {
+				//approach: restrict graph to states where p OR v are true
+				//see if there is a path on this graph from state s to a state modeling v
+				ArrayList<Number> legal = new ArrayList<Number>();
+				ArrayList<Number> fin = new ArrayList<Number>();
+				ArrayList<Number> discovered = new ArrayList<Number>();
+				for(int a = 1; a <= states; a++) {
+					if(models(p.getChildren().get(1), a)) {
+						legal.add(a);
+						fin.add(a);
+					}
+					else if(models(p.getChildren().get(0), a)) {
+						legal.add(a);
+					}
+				}
+				
+				//simple DFS using only nodes in legal
+				Stack<Number> stack = new Stack<Number>();
+				stack.push(s);
+				while(!stack.isEmpty()) {
+					Number curr = stack.pop();
+					if(!discovered.contains(curr)) {
+						discovered.add(curr);
+						List<Number> nexts = transitions.get(curr);
+						for(Number a : nexts) {
+							if(fin.contains(a)) {
+								res = true;
+								break;
+							}
+							else if(legal.contains(a)) {
+								stack.push(a);
+							}
+						}
+					}
+				}
+				res = false;
 			}
 			if(res) p.addSatisfyingState(s);
 			return res;
