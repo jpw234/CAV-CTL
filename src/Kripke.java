@@ -33,7 +33,6 @@ public class Kripke {
 	/* Functions to write:
 	 * Given state find all states that can reach it
 	 * find Strongly Connected Components of the graph
-	 * K, state models p
 	 */
 	
 	//does the Kripke structure model the given proposition
@@ -69,6 +68,14 @@ public class Kripke {
 		}
 		case NOT: {
 			res = !(models(p.getChildren().get(0), s));
+			if(res) p.addSatisfyingState(s);
+			return res;
+		}
+		case EX: { //K, s0 models EX p iff there exists an s1 such that s0 -> s1 and K, s1 models p
+			List<Number> nexts = transitions.get(s);
+			for(Number n : nexts) {
+				res = res || (models(p.getChildren().get(0), n));
+			}
 			if(res) p.addSatisfyingState(s);
 			return res;
 		}
