@@ -12,3 +12,26 @@ EOF
 
 An example can be found in kripke.txt, which represents the structure in kripke-simple.png  
 Parser currently does not support named states or propositions
+
+Format for CTL formula files:
+
+Each line in such a file is presumed to be a CTL formula.  
+CTL formula are a series of tokens separated by whitespace ending in a newline.  
+Basic propositions are represented by integers.  
+The grammar for CTL formula is as follows:  
+| P P (or)  
+& P P (and)  
+N P (not)  
+G P (EG)  
+X P (EX)  
+U P P (EU)  
+F P (EF)  
+AX P  
+AG P  
+AF P  
+AR P P  
+
+An example list of CTL formulae is given in formulae.txt.  
+Other propositions are not currently supported. All propositions are converted to EG/EX/EU under the hood.
+
+To use this tool, compile the Java files and run CTL_Checker. Pass in a path to a legal Kripke structure definition and a legal list of CTL formulae.
