@@ -121,9 +121,9 @@ public class Kripke {
 								stack.push(a);
 							}
 						}
+						if(res) break;
 					}
 				}
-				res = false;
 			}
 			if(res) p.addSatisfyingState(s);
 			return res;
