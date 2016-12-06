@@ -20,6 +20,11 @@ public class CTLParser {
 	 * G P (EG)
 	 * X P (EX)
 	 * U P P (EU)
+	 * F P (EF)
+	 * AX P
+	 * AG P
+	 * AF P
+	 * AR P P
 	 * 
 	 * in order for the parser
 	 */
@@ -83,6 +88,34 @@ public class CTLParser {
 		case "U": {
 			stack.pop(); //consume U
 			return new CTLProp(parseExp(stack), parseExp(stack), CTLEnum.EU);
+		}
+		case "F": { //EF p = E (p | not p) U p
+			stack.pop(); //consume X
+			CTLProp p = parseExp(stack);
+			return new CTLProp(new CTLProp(p, new CTLProp(p, CTLEnum.NOT), CTLEnum.OR), p, CTLEnum.EU);
+		}
+		case "AX": { //AX p = not (EX not p)
+			stack.pop(); //consume AX
+			CTLProp p = parseExp(stack);
+			return new CTLProp(new CTLProp(new CTLProp(p, CTLEnum.NOT), CTLEnum.EX), CTLEnum.NOT);
+		}
+		case "AG": { //AG p = not (EF not p)
+			stack.pop(); //consume AG
+			CTLProp p = parseExp(stack);
+			CTLProp notp = new CTLProp(p, CTLEnum.NOT);
+			return new CTLProp(new CTLProp(new CTLProp(notp, new CTLProp(notp, CTLEnum.NOT), CTLEnum.OR), notp, CTLEnum.EU), CTLEnum.NOT);
+		}
+		case "AF": { //AF p = not (EG not p)
+			stack.pop(); //consume AF
+			CTLProp p = parseExp(stack);
+			CTLProp notp = new CTLProp(p, CTLEnum.NOT);
+			return new CTLProp(new CTLProp(notp, CTLEnum.EG), CTLEnum.NOT);
+		}
+		case "AR": { //AR p = not (E notp U notp)
+			stack.pop(); //consume AR
+			CTLProp p = parseExp(stack);
+			CTLProp notp = new CTLProp(p, CTLEnum.NOT);
+			return new CTLProp(new CTLProp(notp, notp, CTLEnum.EU), CTLEnum.NOT);
 		}
 		default: {//integer case
 			return new CTLProp(Integer.parseInt(stack.pop()));
