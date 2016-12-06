@@ -11,13 +11,14 @@ public class CTLProp{
 	public CTLProp(CTLProp l, CTLProp r, CTLEnum t) {
 		left = l;
 		right = r;
+		type = t;
 		if(type != CTLEnum.AND && type != CTLEnum.OR && type != CTLEnum.EU) 
 			throw new Error("illegal type to binary CTLProp");
-		type = t;
 	}
 	
 	public CTLProp(CTLProp l, CTLEnum t) {
 		left = l;
+		type = t;
 		if(type != CTLEnum.NOT && type != CTLEnum.EG && type != CTLEnum.EX)
 			throw new Error("illegal type to unary CTLProp");
 	}

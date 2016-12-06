@@ -4,6 +4,7 @@ import java.util.Map;
 import java.util.List;
 import java.util.HashMap;
 import java.util.ArrayList;
+import ctltree.*;
 
 public class CTL_Checker {
 	//the handler class for the CTL model checker
@@ -16,7 +17,7 @@ public class CTL_Checker {
 		
 		String path = in.nextLine();
 		
-		Kripke krip;
+		Kripke krip = null;
 		
 		try {
 			BufferedReader reader = new BufferedReader(new FileReader(path));
@@ -94,7 +95,7 @@ public class CTL_Checker {
 			}
 			reader.close();
 			krip = new Kripke(states, transitions, start_states, props, labeler);
-			System.out.println("finished");
+			System.out.println("finished parsing K");
 		}
 		catch(FileNotFoundException e) {
 			System.out.println("File not found, please try again");
@@ -106,5 +107,7 @@ public class CTL_Checker {
 			System.out.println("Unforeseen exception, maybe the Kripke structure is incorrectly defined?");
 		}
 		
+		CTLProp c = new CTLProp(new CTLProp(2), CTLEnum.EX);
+		System.out.println(krip.models(c));
 	}
 }
