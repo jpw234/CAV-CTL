@@ -168,15 +168,11 @@ public class Kripke {
 		List<Number> acceptable = modelling_states(p);
 		ArrayList<Number> res = new ArrayList<Number>();
 		//find all SCCs with Tarjan's algorithm
-		ArrayList<ArrayList<Number>> allSCCs = scc();
+		ArrayList<ArrayList<Number>> allSCCs = scc(acceptable);
 		//for each SCC check if acceptable entirely contains it
 		for(List<Number> scc : allSCCs) {
-			//if so, add it to res
-			if(acceptable.containsAll(scc)) {
-				//(but don't add duplicate numbers)
-				for(Number n : scc) {
-					if(!res.contains(n)) res.add(n);
-				}
+			for(Number n : scc) {
+				if(!res.contains(n)) res.add(n);
 			}
 		}
 		//return res
@@ -190,8 +186,9 @@ public class Kripke {
 	private ArrayList<ArrayList<Number>> sccs = null;
 	
 	//returns a list of SCCs in the Kripke structure (SCCs are lists of states)
+	//Only the SCCs that are composed of entirely states in the "acceptable" parameter
 	//based on https://en.wikipedia.org/wiki/Tarjan's_strongly_connected_components_algorithm
-	private ArrayList<ArrayList<Number>> scc() {
+	private ArrayList<ArrayList<Number>> scc(List<Number> acceptable) {
 		indexes = new HashMap<Number, Number>();
 		index = 0;
 		lowlinks = new HashMap<Number, Number>();
@@ -199,15 +196,16 @@ public class Kripke {
 		sccs = new ArrayList<ArrayList<Number>>();
 		
 		for(int a = 1; a <= states; a++) {
+			if(!acceptable.contains(a)) continue;
 			if(indexes.get(a) == null) {
-				sccinternal(a);
+				sccinternal(a, acceptable);
 			}
 		}
 		
 		return sccs;
 	}
 	
-	private void sccinternal(int v) {
+	private void sccinternal(int v, List<Number> acceptable) {
 		indexes.put(v, index);
 		lowlinks.put(v, index);
 		index++;
@@ -216,8 +214,9 @@ public class Kripke {
 		if(transitions.get(v) == null) return;
 		
 		for(Number w : transitions.get(v)) {
+			if(!acceptable.contains(w)) continue;
 			if(indexes.get(w) == null) {
-				sccinternal((int)w);
+				sccinternal((int)w, acceptable);
 				lowlinks.put(v, Math.min((int)lowlinks.get(v), (int)lowlinks.get(w)));
 			}
 			else if(stack.contains(w)) {
